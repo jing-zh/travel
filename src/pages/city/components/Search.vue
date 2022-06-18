@@ -32,19 +32,19 @@ import { mapMutations } from "vuex";
 export default {
   name: "CitySearch",
   props: {
-    cities: Object
+    cities: Object,
   },
   data() {
     return {
       keyword: "",
       list: [],
-      timer: null
+      timer: null,
     };
   },
   computed: {
     hasNoData() {
       return !this.list.length;
-    }
+    },
   },
   watch: {
     keyword() {
@@ -58,7 +58,7 @@ export default {
       this.timer = setTimeout(() => {
         const result = [];
         for (let i in this.cities) {
-          this.cities[i].forEach(value => {
+          this.cities[i].forEach((value) => {
             if (
               value.spell.indexOf(this.keyword) > -1 ||
               value.name.indexOf(this.keyword) > -1
@@ -69,21 +69,23 @@ export default {
         }
         this.list = result;
       }, 100);
-    }
+    },
   },
   methods: {
     handleCityClick(city) {
       this.changeCity(city);
       this.$router.push("/");
     },
-    ...mapMutations(["changeCity"])
+    ...mapMutations(["changeCity"]),
   },
   mounted() {
-    this.scroll = new BScroll(this.$refs.search);
+    this.scroll = new BScroll(this.$refs.search, {
+      click: true,
+    });
   },
   updated() {
     this.scroll.refresh();
-  }
+  },
 };
 </script>
 
