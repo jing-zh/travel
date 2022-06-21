@@ -27,65 +27,70 @@
 </template>
 
 <script>
+import { computed, onMounted, watch, ref } from "vue";
 import BScroll from "better-scroll";
-import { mapMutations } from "vuex";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 export default {
   name: "CitySearch",
   props: {
     cities: Object,
   },
-  data() {
-    return {
-      keyword: "",
-      list: [],
-      timer: null,
-    };
-  },
-  computed: {
-    hasNoData() {
-      return !this.list.length;
-    },
-  },
-  watch: {
-    keyword() {
-      if (this.timer) {
-        clearTimeout(this.timer);
+
+  setup(props) {
+    const keyword = ref("");
+    const list = ref([]);
+    const search = ref(null);
+    let timer = null;
+    const store = useStore();
+    const router = useRouter();
+    const hasNoData = computed(() => {
+      !list.length;
+    });
+
+    watch(keyword, (keyword, prevKeyword) => {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
       }
-      if (!this.keyword) {
-        this.list = [];
+
+      if (!keyword) {
+        list.value = [];
         return;
       }
-      this.timer = setTimeout(() => {
+
+      timer = setTimeout(() => {
         const result = [];
-        for (let i in this.cities) {
-          this.cities[i].forEach((value) => {
+        for (let i in props.cities) {
+          props.cities[i].forEach((value) => {
             if (
-              value.spell.indexOf(this.keyword) > -1 ||
-              value.name.indexOf(this.keyword) > -1
+              value.spell.indexOf(keyword) > -1 ||
+              value.name.indexOf(keyword) > -1
             ) {
               result.push(value);
             }
           });
         }
-        this.list = result;
+        list.value = result;
       }, 100);
-    },
-  },
-  methods: {
-    handleCityClick(city) {
-      this.changeCity(city);
-      this.$router.push("/");
-    },
-    ...mapMutations(["changeCity"]),
-  },
-  mounted() {
-    this.scroll = new BScroll(this.$refs.search, {
-      click: true,
     });
+
+    function handleCityClick(city) {
+      store.commit("changeCity", city);
+      router.push("/");
+    }
+
+    onMounted(() => {
+      new BScroll(search.value, {
+        click: true,
+      });
+    });
+
+    return { keyword, list, search, hasNoData, handleCityClick };
   },
-  updated() {
-    this.scroll.refresh();
-  },
+  // updated() {
+  //   this.scroll.refresh();
+  // },
 };
 </script>
 
